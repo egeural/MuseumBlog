@@ -23,7 +23,7 @@ app.use('/uploads', express.static('uploads'));
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('../client/dist'));
 
-    app.get('*', (req, res) => {
+    app.get(/(.*)/, (req, res) => {
         res.sendFile(require('path').resolve(__dirname, '../client/dist', 'index.html'));
     });
 } else {
