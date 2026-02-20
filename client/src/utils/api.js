@@ -2,9 +2,9 @@ import axios from 'axios';
 
 // In production (Railway), the frontend is served from the same server as the API.
 // So we use a relative URL. In development we use localhost.
-const baseURL = import.meta.env.MODE === 'production'
-    ? '/api'
-    : 'http://localhost:5000/api';
+export const SERVER_URL = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5000';
+
+const baseURL = `${SERVER_URL}/api`;
 
 const api = axios.create({
     baseURL,

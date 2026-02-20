@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
+import { SERVER_URL } from '../utils/api';
 
 const MuseumCard = ({ museum }) => {
     // Fotoğraf yoksa placeholder göster
     const imageUrl = museum.photos && museum.photos.length > 0
-        ? `http://localhost:5000${museum.photos[0]}`
+        ? `${SERVER_URL}${museum.photos[0]}`
         : 'https://via.placeholder.com/400x250?text=Muze';
 
     return (

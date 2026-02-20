@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../utils/api';
+import api, { SERVER_URL } from '../utils/api';
 
 const MuseumDetail = () => {
     const { id } = useParams();
@@ -26,7 +26,7 @@ const MuseumDetail = () => {
     if (!museum) return <div className="text-center py-20">Müze bulunamadı.</div>;
 
     const mainImage = museum.photos && museum.photos.length > 0
-        ? `http://localhost:5000${museum.photos[0]}`
+        ? `${SERVER_URL}${museum.photos[0]}`
         : 'https://via.placeholder.com/800x400';
 
     return (
