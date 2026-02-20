@@ -5,6 +5,7 @@ import MuseumDetail from './pages/MuseumDetail';
 import Login from './pages/Admin/Login';
 import Dashboard from './pages/Admin/Dashboard';
 import Editor from './pages/Admin/Editor';
+import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -18,9 +19,9 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/museum/:id" element={<MuseumDetail />} />
               <Route path="/admin/login" element={<Login />} />
-              <Route path="/admin/dashboard" element={<Dashboard />} />
-              <Route path="/admin/editor" element={<Editor />} />
-              <Route path="/admin/editor/:id" element={<Editor />} />
+              <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/admin/editor" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
+              <Route path="/admin/editor/:id" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
             </Routes>
           </main>
           <footer className="bg-museum-dark text-white text-center py-4 mt-8">

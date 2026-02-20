@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -23,6 +23,56 @@ const Editor = () => {
     const [loading, setLoading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('');
     const [error, setError] = useState('');
+    const quillRef = useRef(null);
+
+    const imageHandler = () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (file) {
+                const data = new FormData();
+                data.append('image', file);
+
+                try {
+                    setUploadStatus('Metin içi görsel yükleniyor...');
+                    const res = await api.post('/upload', data, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+
+                    const url = res.data.filePath;
+                    const quill = quillRef.current.getEditor();
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range.index, 'image', url);
+
+                    setUploadStatus('Metin içi görsel yüklendi ✓');
+                    setTimeout(() => setUploadStatus(''), 3000);
+                } catch (err) {
+                    console.error('Image upload failed', err);
+                    setError('İçerik içi görsel yükleme hatası: ' + (err.response?.data?.msg || err.message));
+                    setUploadStatus('Görsel yüklenemedi ✗');
+                }
+            }
+        };
+    };
+
+    const modules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                ['link', 'image', 'video'],
+                ['clean']
+            ],
+            handlers: {
+                image: imageHandler
+            }
+        }
+    }), []);
 
     useEffect(() => {
         if (id) {
@@ -191,7 +241,9 @@ const Editor = () => {
                 <div>
                     <label className="block text-gray-700 font-bold mb-2">Detaylı İçerik</label>
                     <ReactQuill
+                        ref={quillRef}
                         theme="snow"
+                        modules={modules}
                         value={formData.content}
                         onChange={(content) => setFormData({ ...formData, content })}
                         className="bg-white h-64 mb-12"
