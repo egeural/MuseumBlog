@@ -21,6 +21,8 @@ const Editor = () => {
     });
     const [imageFile, setImageFile] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (id) {
@@ -44,14 +46,18 @@ const Editor = () => {
         if (!imageFile) return null;
         const data = new FormData();
         data.append('image', imageFile);
+        setUploadStatus('Görsel yükleniyor...');
 
         try {
             const res = await api.post('/upload', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+            setUploadStatus('Görsel yüklendi ✓');
             return res.data.filePath;
         } catch (err) {
             console.error('Upload Error', err);
+            setUploadStatus('Görsel yüklenemedi ✗');
+            setError('Görsel yükleme hatası: ' + (err.response?.data?.msg || err.message));
             return null;
         }
     };
@@ -59,6 +65,7 @@ const Editor = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
 
         let uploadedPath = null;
         if (imageFile) {
@@ -67,7 +74,6 @@ const Editor = () => {
 
         const museumData = { ...formData };
         if (uploadedPath) {
-            // Replace photos array with new photo for simplicity, or append
             museumData.photos = [uploadedPath];
         }
 
@@ -80,7 +86,8 @@ const Editor = () => {
             navigate('/admin/dashboard');
         } catch (err) {
             console.error('Save Error', err);
-            alert('Kaydetme hatası');
+            const errMsg = err.response?.data?.msg || err.response?.data || err.message;
+            setError('Kaydetme hatası: ' + errMsg);
         } finally {
             setLoading(false);
         }
@@ -91,6 +98,12 @@ const Editor = () => {
             <h1 className="text-2xl font-bold mb-6 text-museum-dark">
                 {id ? 'Müze Düzenle' : 'Yeni Müze Ekle'}
             </h1>
+
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <strong>Hata:</strong> {error}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -139,11 +152,16 @@ const Editor = () => {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Görsel Yükle</label>
-                    <input type="file"
+                    <label className="block text-sm font-medium text-gray-700">Görsel Yükle (JPG, PNG, GIF, WEBP)</label>
+                    <input type="file" accept="image/*"
                         className="mt-1 block w-full border border-gray-300 rounded p-2"
                         onChange={handleFileChange}
                     />
+                    {uploadStatus && (
+                        <p className={`mt-1 text-sm ${uploadStatus.includes('✓') ? 'text-green-600' : uploadStatus.includes('✗') ? 'text-red-600' : 'text-blue-600'}`}>
+                            {uploadStatus}
+                        </p>
+                    )}
                     {formData.photos && formData.photos.length > 0 && !imageFile && (
                         <div className="mt-2 text-sm text-green-600">Mevcut görsel korunacak.</div>
                     )}

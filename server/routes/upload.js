@@ -36,10 +36,12 @@ function checkFileType(file, cb) {
     }
 }
 
+const auth = require('../middleware/auth');
+
 // @route   POST api/upload
 // @desc    Upload an image
-// @access  Public (or Private)
-router.post('/', (req, res) => {
+// @access  Private
+router.post('/', auth, (req, res) => {
     upload(req, res, (err) => {
         if (err) {
             res.status(400).json({ msg: err });
